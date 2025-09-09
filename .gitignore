@@ -50,3 +50,26 @@ package.json
 /man/
 /share/
 /src/
+
+# custom addons directory
+custom-addons/
+config/
+requirements-custom.txt
+et-addons/
+
+# GUIDE DOCKER
+docker CLI.txt
+Docker Odoo Guide.txt
+Docker Run Desktop.txt
+
+# Cursor
+memory-bank/
+
+# Docker
+docker-compose.yml
+odoo.conf
+Dockerfile
+
+# Git
+CONTRIBUTING_GUIDE.md
+pgadmin-servers.json
