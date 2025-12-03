@@ -427,7 +427,7 @@ class AccountEdiCommon(models.AbstractModel):
         """ Retrieve the bank account, if no matching bank account is found, create it """
         # clear the context, because creation of partner when importing should not depend on the context default values
         ResPartnerBank = self.env['res.partner.bank'].with_env(self.env(context=clean_context(self.env.context)))
-        bank_details = list(map(sanitize_account_number, bank_details))
+        bank_details = list(set(map(sanitize_account_number, bank_details)))
         partner = self.env.company.partner_id if invoice.is_inbound() else invoice.partner_id
         banks_to_create = []
         acc_number_partner_bank_dict = {
@@ -640,7 +640,7 @@ class AccountEdiCommon(models.AbstractModel):
         """
         xpath_dict = self._get_line_xpaths(document_type, qty_factor)
         # basis_qty (optional)
-        basis_qty = float(self._find_value(xpath_dict['basis_qty'], tree) or 1)
+        basis_qty = float(self._find_value(xpath_dict['basis_qty'], tree) or 1) or 1.0
 
         # gross_price_unit (optional)
         gross_price_unit = None
@@ -724,8 +724,8 @@ class AccountEdiCommon(models.AbstractModel):
 
         # discount
         discount = 0
-        if delivered_qty * price_unit != 0 and price_subtotal is not None:
-            currency = self.env.company.currency_id
+        currency = self.env.company.currency_id
+        if not float_is_zero(delivered_qty * price_unit, currency.decimal_places) and price_subtotal is not None:
             inferred_discount = 100 * (1 - (price_subtotal - charge_amount) / currency.round(delivered_qty * price_unit))
             discount = inferred_discount if not float_is_zero(inferred_discount, currency.decimal_places) else 0.0
 

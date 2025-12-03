@@ -292,6 +292,15 @@ class Ewaybill(models.Model):
         self.ensure_one()
         return self._get_gst_treatment()[1] in ('overseas', 'special_economic_zone')
 
+    @api.model
+    def _get_default_help_message(self, status):
+        return self.env._(
+            "Somehow this E-waybill has been %s in the government portal before. "
+            "You can verify by checking the details into the government "
+            "(https://ewaybillgst.gov.in/Others/EBPrintnew.aspx)",
+            status
+        )
+
     def _check_configuration(self):
         error_message = []
         methods_to_check = [
@@ -525,9 +534,9 @@ class Ewaybill(models.Model):
         AccountEDI = self.env['account.edi.format']
         product = line.product_id
         line_details = {
-            "productName": product.name,
+            "productName": product.name[:100],
             "hsnCode": AccountEDI._l10n_in_edi_extract_digits(product.l10n_in_hsn_code),
-            "productDesc": product.name,
+            "productDesc": line.description_picking[:100] if line.description_picking else "",
             "quantity": line.quantity,
             "qtyUnit": line.product_uom.l10n_in_code and line.product_uom.l10n_in_code.split("-")[
                 0] or "OTH",
